@@ -46,10 +46,10 @@ public class PUtil {
 
     public static <T> ParseRes<T> parserSeq(String str, BParser<T> p1, BParser<T>... ps) {
         ParseRes<T> currPR = p1.parse(str);
-        System.out.println("CURRENT PARSE SEQ: " + currPR);
+//        System.out.println("CURRENT PARSE SEQ: " + currPR);
         for (int i = 0; i < ps.length; i++) {
             currPR = ps[i].parse(currPR);
-            System.out.println("CURRENT PARSE SEQ: " + currPR);
+//            System.out.println("CURRENT PARSE SEQ: " + currPR);
         }
         return currPR;
     }

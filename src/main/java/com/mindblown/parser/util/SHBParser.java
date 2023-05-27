@@ -45,6 +45,18 @@ public class SHBParser extends BParser<StrBParser[]> {
             return new ParseRes(pr.getStrRem(), new CHR(pr.getParseVal().charAt(2)));
         }
     };
+    
+    private static Parser<STR> STR_PARSER = (str) -> {
+        ONE_OR_MORE<String> oneOrMoreP = new ONE_OR_MORE<>(new SAT((str1)-> str1.charAt(0) != '"'));
+        ParseRes<String> pr = PUtil.parserSeq(str, new SYMBOL("str"), new SPACES(), 
+                new CHR('"'), oneOrMoreP, new CHR('"'));
+        if(pr.failed()){
+            return new ParseRes<>();
+        }
+        String parseVal = pr.getParseVal();
+        String strLookingFor = parseVal.substring(4,parseVal.length()-1);
+        return new ParseRes<>(pr.getStrRem(), new STR(strLookingFor));
+    };
 
     public SHBParser() {
         super(binder);
@@ -52,7 +64,7 @@ public class SHBParser extends BParser<StrBParser[]> {
 
     @Override
     public ParseRes<StrBParser[]> parse(String str) {
-        ParseRes<StrBParser> pr = new ONE_OF<>(new Parser[]{ONE_PARSER, CHR_PARSER}).parse(str);
+        ParseRes<StrBParser> pr = new ONE_OF<>(new Parser[]{ONE_PARSER, CHR_PARSER, STR_PARSER}).parse(str);
         if (pr.failed()) {
             return new ParseRes<>();
         }
