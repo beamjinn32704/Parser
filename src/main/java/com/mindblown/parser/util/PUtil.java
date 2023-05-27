@@ -5,10 +5,10 @@
 package com.mindblown.parser.util;
 
 import com.mindblown.parser.BParser;
-import static com.mindblown.parser.BParser.failedParse;
-import com.mindblown.parser.ParseRes;
 import com.mindblown.parser.Parser;
+import com.mindblown.parser.ParseRes;
 import com.mindblown.parser.StrBParser;
+import java.util.Arrays;
 
 /**
  *
@@ -53,4 +53,41 @@ public class PUtil {
         }
         return currPR;
     }
+    
+    public static <T> ParseRes<T> parserSeq(String str, BParser<T>[] ps){
+        assert ps.length > 0;
+        return parserSeq(str, ps[0], Arrays.copyOfRange(ps, 1, ps.length));
+    }
+    
+    /**
+     * Uses the parse string argument to define a set of Parser operations on strToParse, essentially 
+     * providing a way to shorthand parsing.
+     * @param <T>
+     * @param parse The parse string follows this grammar ('|' means or, describes multiple ways of defining a type of parser): <br>
+     * <ul> <li> ONE: . | one </li>
+     * <li> SAT: sat </li>
+     * <li> CHR: c 'character' </li>
+     * <li> STR: str "String" </li>
+     * <li> SPACES: spc | _ </li>
+     * <li> SYMBOL: sym "String" </li>
+     * <li> TOKEN: tok {Parser} </li>
+     * <li> ONE_OR_MORE: onem {Parser} </li>
+     * <li> ZERO_OR_MORE: zerom {Parser} </li>
+     * <li> ONE_OF: onef {Parser1} {Parser2} etc. </li>
+     * </ul>
+     * @param strToParse
+     * @return 
+     */
+    public static ParseRes<String> runParseShorthand(String parse, String strToParse){
+        StrBParser[] parsers = getParsersSH(parse);
+        return parserSeq(strToParse, parsers);
+    }
+    
+    private static <T> StrBParser[] getParsersSH(String parse){
+        ParseRes<StrBParser[]> res = new SHBParser().parse(parse);
+        System.out.println("GET PARSERS SH FAILED: " + res.failed());
+        return res.getParseVal();
+    }
+    
+    
 }
