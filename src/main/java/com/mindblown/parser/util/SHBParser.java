@@ -28,7 +28,10 @@ public class SHBParser extends BParser<StrBParser[]> {
     };
 
     private static Parser<ONE> ONE_PARSER = (str) -> {
-        ParseRes pr = new SYMBOL("one").parse(str);
+        StrBParser[] ps = new StrBParser[]{new SYMBOL("one"), new SYMBOL(".")};
+        Parser<String> p = new ONE_OF<>(ps);
+        ParseRes pr = p.parse(str);
+//        ParseRes pr = new SYMBOL("one").parse(str);
         if (!pr.failed()) {
             return new ParseRes(pr.getStrRem(), new ONE());
         } else {
