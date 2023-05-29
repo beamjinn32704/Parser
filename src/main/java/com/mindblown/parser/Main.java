@@ -79,10 +79,12 @@ public class Main {
         ParseRes pr23 = PUtil.runParseShorthand("c 'H' one one one c 'O'", "HellO!!");
         ParseRes pr24 = PUtil.runParseShorthand("c 'H' one one one c 'O'", "Hello!!");
         ParseRes pr25 = PUtil.runParseShorthand("str \"YO \" ... c '!'", "YO BEN!WASSUP");
+        ParseRes pr26 = PUtil.runParseShorthand("_ str \"var\" spc T str \"string\" _ ", "var string = 'LETS GO';");
         System.out.println(pr22);
         System.out.println(pr23);
         System.out.println(pr24);
         System.out.println(pr25);
+        System.out.println(pr26);
         
         
     }

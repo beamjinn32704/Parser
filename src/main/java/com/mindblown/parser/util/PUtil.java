@@ -5,6 +5,7 @@
 package com.mindblown.parser.util;
 
 import com.mindblown.parser.BParser;
+import com.mindblown.parser.Binder;
 import com.mindblown.parser.Parser;
 import com.mindblown.parser.ParseRes;
 import com.mindblown.parser.StrBParser;
@@ -43,6 +44,43 @@ public class PUtil {
             return pr2;
         }
     }
+    
+    /**
+     * If first parser doesn't fail, return the result from that; otherwise, return the result 
+     * from the second parser.
+     *
+     * @param <T>
+     * @param p1
+     * @param p2
+     * @param str
+     * @return
+     */
+    public static <T> ParseRes<T> pOr(Parser<T> p1, Parser<T> p2, String str) {
+        ParseRes<T> pr1 = p1.parse(str);
+        if(!pr1.failed()){
+            return pr1;
+        } else {
+            return p2.parse(str);
+        }
+    }
+    
+    public static <T> ParseRes<T> parserSeq(String str, Binder<T> binder, Parser<T> p1, Parser<T>... ps){
+        ParseRes<T> currPR = p1.parse(str);
+        for (int i = 0; i < ps.length; i++) {
+            ParseRes<T> pr = ps[i].parse(currPR.getStrRem());
+            if(pr.failed()){
+                return new ParseRes<>();
+            }
+            currPR = new ParseRes<>(pr.getStrRem(), 
+                    binder.bind(currPR.getParseVal(), pr.getParseVal()));
+        }
+        return currPR;
+    }
+    
+    public static <T> ParseRes<T> parserSeq(String str, Binder<T> binder, Parser<T>[] ps){
+        assert ps.length > 0;
+        return parserSeq(str, binder, ps[0], Arrays.copyOfRange(ps, 1, ps.length));
+    }
 
     public static <T> ParseRes<T> parserSeq(String str, BParser<T> p1, BParser<T>... ps) {
         ParseRes<T> currPR = p1.parse(str);
@@ -80,6 +118,9 @@ public class PUtil {
      */
     public static ParseRes<String> runParseShorthand(String parse, String strToParse){
         StrBParser[] parsers = getParsersSH(parse);
+        if(parsers == null){
+            return new ParseRes<>();
+        }
         return parserSeq(strToParse, parsers);
     }
     

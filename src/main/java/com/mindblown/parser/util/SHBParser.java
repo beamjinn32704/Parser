@@ -48,17 +48,54 @@ public class SHBParser extends BParser<StrBParser[]> {
             return new ParseRes(pr.getStrRem(), new CHR(pr.getParseVal().charAt(2)));
         }
     };
-    
+
     private static Parser<STR> STR_PARSER = (str) -> {
-        ONE_OR_MORE<String> oneOrMoreP = new ONE_OR_MORE<>(new SAT((str1)-> str1.charAt(0) != '"'));
-        ParseRes<String> pr = PUtil.parserSeq(str, new SYMBOL("str"), new SPACES(), 
+        ONE_OR_MORE<String> oneOrMoreP = new ONE_OR_MORE<>(new SAT((str1) -> str1.charAt(0) != '"'));
+        ParseRes<String> pr = PUtil.parserSeq(str, new SYMBOL("str"), new SPACES(),
                 new CHR('"'), oneOrMoreP, new CHR('"'));
-        if(pr.failed()){
+        if (pr.failed()) {
             return new ParseRes<>();
         }
         String parseVal = pr.getParseVal();
-        String strLookingFor = parseVal.substring(4,parseVal.length()-1);
+        String strLookingFor = parseVal.substring(4, parseVal.length() - 1);
         return new ParseRes<>(pr.getStrRem(), new STR(strLookingFor));
+    };
+
+    private static Parser<SPACES> SPACES_PARSER = (str) -> {
+
+        Parser<SPACES> p1 = (str1) -> {
+            ParseRes<String> pr1 = PUtil.parserSeq(str1, StrBParser.STRING_BINDER, new SYMBOL("spc"),
+                    new ONE_OF<String>(new StrBParser[]{new SYMBOL("T"), new SYMBOL("F")}));
+            if (pr1.failed()) {
+                return new ParseRes<>();
+            } else {
+                String parseVal = pr1.getParseVal();
+                boolean keepSpc = parseVal.charAt(parseVal.length() - 1) == 'T';
+                return new ParseRes<>(pr1.getStrRem(), new SPACES(keepSpc));
+            }
+        };
+
+        Parser<SPACES> p2 = (str1) -> {
+            ParseRes<String> pr2 = new SYMBOL("_").parse(str1);
+            if (pr2.failed()) {
+                return new ParseRes<>();
+            } else {
+                return new ParseRes<>(pr2.getStrRem(), new SPACES());
+            }
+        };
+        
+        return PUtil.pOr(p1, p2, str);
+        
+//        
+//
+//        ONE_OF<String> oneOfP = new ONE_OF<>(new StrBParser[]{new STR("spc"), new CHR('_')});
+//        ParseRes<String> pr = oneOfP.parse(str);
+//
+//        if (pr.failed()) {
+//            return new ParseRes<SPACES>();
+//        }
+//
+//        return new ParseRes<SPACES>(pr.getStrRem(), new SPACES());
     };
 
     public SHBParser() {
@@ -67,7 +104,7 @@ public class SHBParser extends BParser<StrBParser[]> {
 
     @Override
     public ParseRes<StrBParser[]> parse(String str) {
-        ParseRes<StrBParser> pr = new ONE_OF<>(new Parser[]{ONE_PARSER, CHR_PARSER, STR_PARSER}).parse(str);
+        ParseRes<StrBParser> pr = new ONE_OF<>(new Parser[]{ONE_PARSER, CHR_PARSER, STR_PARSER, SPACES_PARSER}).parse(str);
         if (pr.failed()) {
             return new ParseRes<>();
         }
