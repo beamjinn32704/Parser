@@ -167,12 +167,17 @@ public class PUtil {
 
     public static StrBParser[] getParsersSH(String parse) {
         ParseRes<Parser<String>[]> res = new SHBParser().parse(parse);
-        System.out.println("GET PARSERS SH FAILED: " + res.failed());
+        
+        if(res.failed() || !res.getStrRem().isBlank()){
+            return null;
+        }
+        
         Object[] pObjs = res.getParseVal();
         StrBParser[] ps = new StrBParser[pObjs.length];
         for(int i = 0; i < pObjs.length; i++){
             ps[i] = StrBParser.makeParser((Parser<String>) pObjs[i]);
         }
+        
         return ps;
     }
 

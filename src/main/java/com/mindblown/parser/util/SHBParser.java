@@ -104,6 +104,53 @@ public class SHBParser extends BParser<Parser<String>[]> {
         Parser<String> tokenP = (str1) -> PUtil.parserSeq(str1, StrBParser.STRING_BINDER, ps);
         return new ParseRes<TOKEN>(pr.getStrRem(), new TOKEN<>(tokenP));
     };
+    
+    private static Parser<ONE_OR_MORE> ONE_OR_MORE_PARSER = (str) -> {
+        ParseRes<String> pr = PUtil.parserSeq(str, StrBParser.STRING_BINDER, new SYMBOL("oom"), 
+                new TOKEN(new SURROUND('{', '}')));
+        if(pr.failed()){
+            return new ParseRes<ONE_OR_MORE>();
+        }
+        
+        String parseVal = pr.getParseVal();
+        String parseSH = parseVal.substring(4, parseVal.length() - 1);
+        Parser<String>[] ps = PUtil.getParsersSH(parseSH);
+        if(ps == null || ps.length == 0){
+            return new ParseRes<>();
+        }
+        StrBParser[] oomPs = PUtil.getParsersSH(parseSH);
+        StrBParser oomP = new StrBParser(){
+            @Override
+            public ParseRes<String> parse(String str1) {
+                return PUtil.parserSeq(str1, oomPs);
+            }
+        };
+        return new ParseRes<ONE_OR_MORE>(pr.getStrRem(), new ONE_OR_MORE<>(oomP));
+    };
+    
+    private static Parser<ZERO_OR_MORE> ZERO_OR_MORE_PARSER = (str) -> {
+        ParseRes<String> pr = PUtil.parserSeq(str, StrBParser.STRING_BINDER, new SYMBOL("zom"), 
+                new TOKEN(new SURROUND('{', '}')));
+        if(pr.failed()){
+            return new ParseRes<ZERO_OR_MORE>();
+        }
+        
+        String parseVal = pr.getParseVal();
+        String parseSH = parseVal.substring(4, parseVal.length() - 1);
+        Parser<String>[] ps = PUtil.getParsersSH(parseSH);
+        if(ps == null || ps.length == 0){
+            return new ParseRes<>();
+        }
+        StrBParser[] zomPs = PUtil.getParsersSH(parseSH);
+        StrBParser zomP = new StrBParser(){
+            @Override
+            public ParseRes<String> parse(String str1) {
+                return PUtil.parserSeq(str1, zomPs);
+            }
+        };
+        return new ParseRes<ZERO_OR_MORE>(pr.getStrRem(), new ZERO_OR_MORE<>(zomP, ""));
+    };
+    
 
     public SHBParser() {
         super(PUtil.makeBinder());
@@ -112,7 +159,9 @@ public class SHBParser extends BParser<Parser<String>[]> {
     @Override
     public ParseRes<Parser<String>[]> parse(String str) {
 //        ONE_OF<Parser<String>> parser = new ONE_OF<>(new Parser<Parser<String>>[]{ONE_PARSER, CHR_PARSER, STR_PARSER, SPACES_PARSER, SYMBOL_PARSER, TOKEN_PARSER});
-        ONE_OF<Parser<String>> parser = new ONE_OF(ONE_PARSER, CHR_PARSER, STR_PARSER, SPACES_PARSER, SYMBOL_PARSER, TOKEN_PARSER);
+        ONE_OF<Parser<String>> parser = new ONE_OF(ONE_PARSER, CHR_PARSER, STR_PARSER, 
+                SPACES_PARSER, SYMBOL_PARSER, TOKEN_PARSER, ONE_OR_MORE_PARSER, 
+                ZERO_OR_MORE_PARSER);
         
         ParseRes<Parser<String>[]> pr = ONE_OR_MORE.parseNoB(str, parser);
         
