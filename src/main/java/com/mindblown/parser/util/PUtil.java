@@ -150,9 +150,9 @@ public class PUtil {
      * <li> SPACES: spc | _ </li>
      * <li> SYMBOL: sym "String" </li>
      * <li> TOKEN: tok {Parser} </li>
-     * <li> ONE_OR_MORE: onem {Parser} </li>
-     * <li> ZERO_OR_MORE: zerom {Parser} </li>
-     * <li> ONE_OF: onef {Parser1} {Parser2} etc. </li>
+     * <li> ONE_OR_MORE: oom {Parser} </li>
+     * <li> ZERO_OR_MORE: zom {Parser} </li>
+     * <li> ONE_OF: oof {Parser1} {Parser2} etc. </li>
      * </ul>
      * @param strToParse
      * @return
