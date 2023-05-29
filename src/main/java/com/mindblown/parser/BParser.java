@@ -18,7 +18,15 @@ public class BParser<T> implements Parser<T> {
         this.binder = binder;
     }
     
-    public <T> ParseRes<T> newParseRes(String str){
+    public static <T> BParser<T> newBParser(Parser<T> p, Binder<T> binder){
+        return new BParser<T>(binder){
+            public ParseRes<T> parse(String str){
+                return p.parse(str);
+            }
+        };
+    }
+    
+    public static <T> ParseRes<T> newParseRes(String str){
         return new ParseRes<>(str);
     }
     

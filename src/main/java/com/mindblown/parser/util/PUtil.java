@@ -9,6 +9,7 @@ import com.mindblown.parser.Binder;
 import com.mindblown.parser.Parser;
 import com.mindblown.parser.ParseRes;
 import com.mindblown.parser.StrBParser;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
@@ -44,10 +45,10 @@ public class PUtil {
             return pr2;
         }
     }
-    
+
     /**
-     * If first parser doesn't fail, return the result from that; otherwise, return the result 
-     * from the second parser.
+     * If first parser doesn't fail, return the result from that; otherwise,
+     * return the result from the second parser.
      *
      * @param <T>
      * @param p1
@@ -57,27 +58,65 @@ public class PUtil {
      */
     public static <T> ParseRes<T> pOr(Parser<T> p1, Parser<T> p2, String str) {
         ParseRes<T> pr1 = p1.parse(str);
-        if(!pr1.failed()){
+        if (!pr1.failed()) {
             return pr1;
         } else {
             return p2.parse(str);
         }
     }
-    
-    public static <T> ParseRes<T> parserSeq(String str, Binder<T> binder, Parser<T> p1, Parser<T>... ps){
-        ParseRes<T> currPR = p1.parse(str);
+
+    public static <T> ParseRes<T[]> parserSeqNoB(String str, Parser<T> p1, Parser<T>... ps) {
+        ParseRes<T> firstPR = p1.parse(str);
+        if(firstPR.failed()){
+            return new ParseRes<>();
+        }
+        Binder<T[]> binder = makeBinder();
+        ParseRes<T[]> currPR = new ParseRes<>(firstPR.getStrRem(), 
+                Util.toLst(firstPR.getParseVal()));
         for (int i = 0; i < ps.length; i++) {
             ParseRes<T> pr = ps[i].parse(currPR.getStrRem());
-            if(pr.failed()){
+            if (pr.failed()) {
                 return new ParseRes<>();
             }
-            currPR = new ParseRes<>(pr.getStrRem(), 
-                    binder.bind(currPR.getParseVal(), pr.getParseVal()));
+            currPR = new ParseRes<>(pr.getStrRem(),
+                    binder.bind(currPR.getParseVal(), Util.toLst(pr.getParseVal())));
         }
         return currPR;
     }
     
-    public static <T> ParseRes<T> parserSeq(String str, Binder<T> binder, Parser<T>[] ps){
+    public static <T> ParseRes<T[]> parserSeqNoB(String str, Parser<T>[] ps) {
+        assert ps.length > 0;
+        return parserSeqNoB(str, ps[0], Arrays.copyOfRange(ps, 1, ps.length));
+    }
+    
+    public static <T> Binder<T[]> makeBinder() {
+        Binder<T[]> binder = (a1, a2) -> {
+            ArrayList<T> tList = new ArrayList<>();
+            for (int i = 0; i < a1.length; i++) {
+                tList.add(a1[i]);
+            }
+            for (int i = 0; i < a2.length; i++) {
+                tList.add(a2[i]);
+            }
+            return tList.toArray(a1);
+        };
+        return binder;
+    }
+
+    public static <T> ParseRes<T> parserSeq(String str, Binder<T> binder, Parser<T> p1, Parser<T>... ps) {
+        ParseRes<T> currPR = p1.parse(str);
+        for (int i = 0; i < ps.length; i++) {
+            ParseRes<T> pr = ps[i].parse(currPR.getStrRem());
+            if (pr.failed()) {
+                return new ParseRes<>();
+            }
+            currPR = new ParseRes<>(pr.getStrRem(),
+                    binder.bind(currPR.getParseVal(), pr.getParseVal()));
+        }
+        return currPR;
+    }
+
+    public static <T> ParseRes<T> parserSeq(String str, Binder<T> binder, Parser<T>[] ps) {
         assert ps.length > 0;
         return parserSeq(str, binder, ps[0], Arrays.copyOfRange(ps, 1, ps.length));
     }
@@ -91,17 +130,19 @@ public class PUtil {
         }
         return currPR;
     }
-    
-    public static <T> ParseRes<T> parserSeq(String str, BParser<T>[] ps){
+
+    public static <T> ParseRes<T> parserSeq(String str, BParser<T>[] ps) {
         assert ps.length > 0;
         return parserSeq(str, ps[0], Arrays.copyOfRange(ps, 1, ps.length));
     }
-    
+
     /**
-     * Uses the parse string argument to define a set of Parser operations on strToParse, essentially 
-     * providing a way to shorthand parsing.
+     * Uses the parse string argument to define a set of Parser operations on
+     * strToParse, essentially providing a way to shorthand parsing.
+     *
      * @param <T>
-     * @param parse The parse string follows this grammar ('|' means or, describes multiple ways of defining a type of parser): <br>
+     * @param parse The parse string follows this grammar ('|' means or,
+     * describes multiple ways of defining a type of parser): <br>
      * <ul> <li> ONE: . | one </li>
      * <li> SAT: sat </li>
      * <li> CHR: c 'character' </li>
@@ -114,20 +155,25 @@ public class PUtil {
      * <li> ONE_OF: onef {Parser1} {Parser2} etc. </li>
      * </ul>
      * @param strToParse
-     * @return 
+     * @return
      */
-    public static ParseRes<String> runParseShorthand(String parse, String strToParse){
-        StrBParser[] parsers = getParsersSH(parse);
-        if(parsers == null){
+    public static ParseRes<String> runParseShorthand(String parse, String strToParse) {
+        Parser<String>[] parsers = getParsersSH(parse);
+        if (parsers == null) {
             return new ParseRes<>();
         }
-        return parserSeq(strToParse, parsers);
+        return parserSeq(strToParse, StrBParser.STRING_BINDER, parsers);
     }
-    
-    private static <T> StrBParser[] getParsersSH(String parse){
-        ParseRes<StrBParser[]> res = new SHBParser().parse(parse);
+
+    public static StrBParser[] getParsersSH(String parse) {
+        ParseRes<Parser<String>[]> res = new SHBParser().parse(parse);
         System.out.println("GET PARSERS SH FAILED: " + res.failed());
-        return res.getParseVal();
+        Object[] pObjs = res.getParseVal();
+        StrBParser[] ps = new StrBParser[pObjs.length];
+        for(int i = 0; i < pObjs.length; i++){
+            ps[i] = StrBParser.makeParser((Parser<String>) pObjs[i]);
+        }
+        return ps;
     }
-    
+
 }

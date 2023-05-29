@@ -6,6 +6,7 @@ package com.mindblown.parser.util;
 
 import com.mindblown.parser.BParser;
 import com.mindblown.parser.ParseRes;
+import com.mindblown.parser.Parser;
 import static com.mindblown.parser.util.PUtil.pOr;
 
 /**
@@ -32,6 +33,19 @@ public class ONE_OR_MORE<T> extends BParser<T> {
 
         return pOr(pr, currPR); // eventually parse(currPR) will return a failed parse, and 
         // when that happens, return currPR
+    }
+    
+    public static <T> ParseRes<T[]> parseNoB(String str, Parser<T> p){
+        Parser<T[]> newP = (str1) -> {
+            ParseRes<T> pr = p.parse(str1);
+            if(pr.failed()){
+                return new ParseRes<>();
+            }
+            return new ParseRes<T[]>(pr.getStrRem(), Util.toLst(pr.getParseVal()));
+        };
+        
+        ONE_OR_MORE<T[]> oomP = new ONE_OR_MORE<>(BParser.newBParser(newP, PUtil.makeBinder()));
+        return oomP.parse(str);
     }
 
 }

@@ -14,18 +14,7 @@ import com.mindblown.parser.StrBParser;
  *
  * @author beamj
  */
-public class SHBParser extends BParser<StrBParser[]> {
-
-    private static Binder<StrBParser[]> binder = (arr1, arr2) -> {
-        StrBParser[] arr = new StrBParser[arr1.length + arr2.length];
-        for (int i = 0; i < arr1.length; i++) {
-            arr[i] = arr1[i];
-        }
-        for (int i = 0; i < arr2.length; i++) {
-            arr[arr1.length + i] = arr2[i];
-        }
-        return arr;
-    };
+public class SHBParser extends BParser<Parser<String>[]> {
 
     private static Parser<ONE> ONE_PARSER = (str) -> {
         StrBParser[] ps = new StrBParser[]{new SYMBOL("one"), new SYMBOL(".")};
@@ -109,24 +98,47 @@ public class SHBParser extends BParser<StrBParser[]> {
         String strLookingFor = parseVal.substring(4, parseVal.length() - 1);
         return new ParseRes<>(pr.getStrRem(), new SYMBOL(strLookingFor));
     };
-
-    public SHBParser() {
-        super(binder);
-    }
-
-    @Override
-    public ParseRes<StrBParser[]> parse(String str) {
-        ParseRes<StrBParser> pr = new ONE_OF<>(new Parser[]{ONE_PARSER, CHR_PARSER, STR_PARSER, SPACES_PARSER, SYMBOL_PARSER}).parse(str);
+    
+    private static Parser<TOKEN> TOKEN_PARSER = (str) -> {
+        ONE_OR_MORE<String> parserInCurlyP = new ONE_OR_MORE<>(new SAT((str1) -> str1.charAt(0) != '}'));
+        ParseRes<String> pr = PUtil.parserSeq(str, new SYMBOL("tok"), new SYMBOL("{"), parserInCurlyP, new SYMBOL("}"));
         if (pr.failed()) {
             return new ParseRes<>();
         }
-
-        ParseRes<StrBParser[]> nextRes = parse(pr.getStrRem());
-        if (nextRes.failed()) {
-            return new ParseRes(pr.getStrRem(), new StrBParser[]{pr.getParseVal()});
-        } else {
-            return new ParseRes(nextRes.getStrRem(), binder.bind(new StrBParser[]{pr.getParseVal()}, nextRes.getParseVal()));
+        String parseVal = pr.getParseVal();
+        String parseSH = parseVal.substring(4, parseVal.length() - 1);
+        Parser<String>[] ps = PUtil.getParsersSH(parseSH);
+        if(ps == null || ps.length == 0){
+            return new ParseRes<>();
         }
+        Parser<String> tokenP = (str1) -> PUtil.parserSeq(str1, StrBParser.STRING_BINDER, ps);
+        return new ParseRes<TOKEN>(pr.getStrRem(), new TOKEN<>(tokenP));
+    };
+
+    public SHBParser() {
+        super(PUtil.makeBinder());
+    }
+
+    @Override
+    public ParseRes<Parser<String>[]> parse(String str) {
+//        ONE_OF<Parser<String>> parser = new ONE_OF<>(new Parser<Parser<String>>[]{ONE_PARSER, CHR_PARSER, STR_PARSER, SPACES_PARSER, SYMBOL_PARSER, TOKEN_PARSER});
+        ONE_OF<Parser<String>> parser = new ONE_OF(ONE_PARSER, CHR_PARSER, STR_PARSER, SPACES_PARSER, SYMBOL_PARSER, TOKEN_PARSER);
+        
+        ParseRes<Parser<String>[]> pr = ONE_OR_MORE.parseNoB(str, parser);
+        
+        return pr;
+        
+//        ParseRes<StrBParser> pr = parser.parse(str);
+//        if (pr.failed()) {
+//            return new ParseRes<>();
+//        }
+//
+//        ParseRes<StrBParser[]> nextRes = parse(pr.getStrRem());
+//        if (nextRes.failed()) {
+//            return new ParseRes(pr.getStrRem(), new StrBParser[]{pr.getParseVal()});
+//        } else {
+//            return new ParseRes(nextRes.getStrRem(), binder.bind(new StrBParser[]{pr.getParseVal()}, nextRes.getParseVal()));
+//        }
     }
 
 }

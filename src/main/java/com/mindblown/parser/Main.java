@@ -81,12 +81,14 @@ public class Main {
         ParseRes pr25 = PUtil.runParseShorthand("str \"YO \" ... c '!'", "YO BEN!WASSUP");
         ParseRes pr26 = PUtil.runParseShorthand("_ str \"var\" spc T str \"string\" _ ", "var string = 'LETS GO';");
         ParseRes pr27 = PUtil.runParseShorthand("sym \"var\" _ ...... sym \"=\"", "var string = 'LETS GO';");
+        ParseRes pr28 = PUtil.runParseShorthand("tok {str \"var\" _ ......}", "      var string = 'LETS GO';");
         System.out.println(pr22);
         System.out.println(pr23);
         System.out.println(pr24);
         System.out.println(pr25);
         System.out.println(pr26);
         System.out.println(pr27);
+        System.out.println(pr28);
         
         
     }

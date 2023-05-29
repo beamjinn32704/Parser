@@ -16,6 +16,15 @@ public class StrBParser extends BParser<String> {
         super(STRING_BINDER); // used lambda to create a Binder interface that concats two strings
     }
     
+    public static StrBParser makeParser(Parser<String> p){
+        return new StrBParser(){
+            @Override
+            public ParseRes<String> parse(String str) {
+                return p.parse(str);
+            }
+        };
+    }
+    
 //    public static UParser.ONE_OR_MORE<String> oneOrMore(String str){
 //        return new UParser.ONE_OR_MORE<>(STRING_BINDER, str);
 //    }

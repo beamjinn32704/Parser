@@ -4,6 +4,7 @@
  */
 package com.mindblown.parser.util;
 
+import com.mindblown.parser.Binder;
 import com.mindblown.parser.ParseRes;
 import com.mindblown.parser.Parser;
 
@@ -17,6 +18,12 @@ public class ONE_OF<T> implements Parser<T> {
 
     public ONE_OF(Parser<T>[] parserLst) {
         this.parserLst = parserLst;
+    }
+    
+    public ONE_OF(Parser<T> p1, Parser<T> p2, Parser<T>... ps){
+        Binder<Parser<T>[]> binder = PUtil.makeBinder();
+        Parser<T>[] lst1 = Util.toLst(p1, p2);
+        this.parserLst = binder.bind(lst1, ps);
     }
 
     @Override
