@@ -35,16 +35,17 @@ public class ONE_OR_MORE<T> extends BParser<T> {
         // when that happens, return currPR
     }
     
-    public static <T> ParseRes<T[]> parseNoB(String str, Parser<T> p){
-        Parser<T[]> newP = (str1) -> {
+    public static <T> ParseRes<Object[]> parseNoB(String str, Parser<T> p){
+        Parser<Object[]> newP = (str1) -> {
             ParseRes<T> pr = p.parse(str1);
             if(pr.failed()){
                 return new ParseRes<>();
             }
-            return new ParseRes<T[]>(pr.getStrRem(), Util.toLst(pr.getParseVal()));
+            T[] parseValLst = Util.toLst(pr.getParseVal());
+            return new ParseRes<Object[]>(pr.getStrRem(), parseValLst);
         };
         
-        ONE_OR_MORE<T[]> oomP = new ONE_OR_MORE<>(BParser.newBParser(newP, PUtil.makeBinder()));
+        ONE_OR_MORE<Object[]> oomP = new ONE_OR_MORE<>(BParser.newBParser(newP, PUtil.makeBinder()));
         return oomP.parse(str);
     }
 
