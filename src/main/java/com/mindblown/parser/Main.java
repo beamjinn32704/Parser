@@ -83,6 +83,9 @@ public class Main {
         ParseRes pr27 = PUtil.runParseShorthand("sym \"var\" _ ...... sym \"=\"", "var string = 'LETS GO';");
         ParseRes pr28 = PUtil.runParseShorthand("tok {str \"var\" _ ......}", "      var string = 'LETS GO';");
         ParseRes pr29 = PUtil.runParseShorthand("oom {c '.'}", ".......YO");
+        ParseRes pr30 = PUtil.runParseShorthand("oom {c '.'}", "YO");
+        ParseRes pr31 = PUtil.runParseShorthand("zom {c '.'}", ".......YO");
+        ParseRes pr32 = PUtil.runParseShorthand("zom {c '.'}", "YO");
         System.out.println(pr22);
         System.out.println(pr23);
         System.out.println(pr24);
@@ -91,7 +94,9 @@ public class Main {
         System.out.println(pr27);
         System.out.println(pr28);
         System.out.println(pr29);
-        
+        System.out.println(pr30);
+        System.out.println(pr31);
+        System.out.println(pr32);
         
     }
 }
