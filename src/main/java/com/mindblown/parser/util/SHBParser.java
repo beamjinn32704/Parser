@@ -39,9 +39,9 @@ public class SHBParser extends BParser<Parser<String>[]> {
     };
 
     private static Parser<STR> STR_PARSER = (str) -> {
-        ONE_OR_MORE<String> oneOrMoreP = new ONE_OR_MORE<>(new SAT((str1) -> str1.charAt(0) != '"'));
-        ParseRes<String> pr = PUtil.parserSeq(str, new SYMBOL("str"), new SPACES(),
-                new CHR('"'), oneOrMoreP, new CHR('"'));
+        ParseRes<String> pr = PUtil.parserSeq(str, StrBParser.STRING_BINDER, 
+                new SYMBOL("str"), new TOKEN(new SURROUND('\"')));
+        
         if (pr.failed()) {
             return new ParseRes<>();
         }
@@ -74,23 +74,11 @@ public class SHBParser extends BParser<Parser<String>[]> {
         };
         
         return PUtil.pOr(p1, p2, str);
-        
-//        
-//
-//        ONE_OF<String> oneOfP = new ONE_OF<>(new StrBParser[]{new STR("spc"), new CHR('_')});
-//        ParseRes<String> pr = oneOfP.parse(str);
-//
-//        if (pr.failed()) {
-//            return new ParseRes<SPACES>();
-//        }
-//
-//        return new ParseRes<SPACES>(pr.getStrRem(), new SPACES());
     };
     
     private static Parser<SYMBOL> SYMBOL_PARSER = (str) -> {
-        ONE_OR_MORE<String> strInQuotesP = new ONE_OR_MORE<>(new SAT((str1) -> str1.charAt(0) != '"'));
-        ParseRes<String> pr = PUtil.parserSeq(str, new SYMBOL("sym"), new SPACES(),
-                new CHR('"'), strInQuotesP, new CHR('"'));
+        ParseRes<String> pr = PUtil.parserSeq(str, StrBParser.STRING_BINDER, 
+                new SYMBOL("sym"), new TOKEN(new SURROUND('\"')));
         if (pr.failed()) {
             return new ParseRes<>();
         }
@@ -100,8 +88,10 @@ public class SHBParser extends BParser<Parser<String>[]> {
     };
     
     private static Parser<TOKEN> TOKEN_PARSER = (str) -> {
-        ONE_OR_MORE<String> parserInCurlyP = new ONE_OR_MORE<>(new SAT((str1) -> str1.charAt(0) != '}'));
-        ParseRes<String> pr = PUtil.parserSeq(str, new SYMBOL("tok"), new SYMBOL("{"), parserInCurlyP, new SYMBOL("}"));
+        ParseRes<String> pr = PUtil.parserSeq(str, StrBParser.STRING_BINDER, new SYMBOL("tok"), 
+                new TOKEN(new SURROUND('{', '}')));
+        
+        
         if (pr.failed()) {
             return new ParseRes<>();
         }
