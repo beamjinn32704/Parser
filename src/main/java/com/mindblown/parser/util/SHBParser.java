@@ -97,6 +97,18 @@ public class SHBParser extends BParser<StrBParser[]> {
 //
 //        return new ParseRes<SPACES>(pr.getStrRem(), new SPACES());
     };
+    
+    private static Parser<SYMBOL> SYMBOL_PARSER = (str) -> {
+        ONE_OR_MORE<String> strInQuotesP = new ONE_OR_MORE<>(new SAT((str1) -> str1.charAt(0) != '"'));
+        ParseRes<String> pr = PUtil.parserSeq(str, new SYMBOL("sym"), new SPACES(),
+                new CHR('"'), strInQuotesP, new CHR('"'));
+        if (pr.failed()) {
+            return new ParseRes<>();
+        }
+        String parseVal = pr.getParseVal();
+        String strLookingFor = parseVal.substring(4, parseVal.length() - 1);
+        return new ParseRes<>(pr.getStrRem(), new SYMBOL(strLookingFor));
+    };
 
     public SHBParser() {
         super(binder);
@@ -104,7 +116,7 @@ public class SHBParser extends BParser<StrBParser[]> {
 
     @Override
     public ParseRes<StrBParser[]> parse(String str) {
-        ParseRes<StrBParser> pr = new ONE_OF<>(new Parser[]{ONE_PARSER, CHR_PARSER, STR_PARSER, SPACES_PARSER}).parse(str);
+        ParseRes<StrBParser> pr = new ONE_OF<>(new Parser[]{ONE_PARSER, CHR_PARSER, STR_PARSER, SPACES_PARSER, SYMBOL_PARSER}).parse(str);
         if (pr.failed()) {
             return new ParseRes<>();
         }
