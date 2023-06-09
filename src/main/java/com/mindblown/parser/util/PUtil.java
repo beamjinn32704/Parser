@@ -144,7 +144,6 @@ public class PUtil {
      * @param parse The parse string follows this grammar ('|' means or,
      * describes multiple ways of defining a type of parser): <br>
      * <ul> <li> ONE: . | one </li>
-     * <li> SAT: sat </li>
      * <li> CHR: c 'character' </li>
      * <li> STR: str "String" </li>
      * <li> SPACES: spc T | spc F | _ </li>
@@ -156,6 +155,7 @@ public class PUtil {
      * <li> SURROUND: sur char | sur startChar endChar
      * </ul>
      * @param strToParse
+     * @param satPreds
      * @return
      */
     public static ParseRes<String> runParseShorthand(String parse, String strToParse) {
