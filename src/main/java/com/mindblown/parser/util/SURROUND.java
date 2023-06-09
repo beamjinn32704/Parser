@@ -28,7 +28,7 @@ public class SURROUND extends StrBParser {
     @Override
     public ParseRes<String> parse(String str) {
         ONE_OR_MORE<String> surroundedP = new ONE_OR_MORE<>(new SAT((str1) -> str1.charAt(0) != endC));
-        return PUtil.parserSeq(str, new CHR(startC), surroundedP, new CHR(endC));
+        return PUtil.parserSeq(str, new SPACES(), new CHR(startC), surroundedP, new CHR(endC));
     }
     
 }

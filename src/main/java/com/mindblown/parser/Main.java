@@ -88,6 +88,7 @@ public class Main {
         ParseRes pr32 = PUtil.runParseShorthand("zom {c '.'}", "YO");
         ParseRes pr33 = PUtil.runParseShorthand("oof {c '1'} {c '2'} {c '3'} {c '4'} {c '5'}", "4");
         ParseRes pr34 = PUtil.runParseShorthand("oof {c '1'} {c '2'} {c '3'} {c '4'} {c '5'}", "6");
+        ParseRes pr35 = PUtil.runParseShorthand("oof {c '1'} {c '2'} {c '3'} {c '4'} {c '5'} sur '", "5 'Hello there!'");
         System.out.println(pr22);
         System.out.println(pr23);
         System.out.println(pr24);
@@ -101,6 +102,7 @@ public class Main {
         System.out.println(pr32);
         System.out.println(pr33);
         System.out.println(pr34);
+        System.out.println(pr35);
         
     }
 }

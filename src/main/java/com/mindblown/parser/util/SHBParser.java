@@ -15,7 +15,7 @@ import com.mindblown.parser.StrBParser;
  * @author beamj
  */
 public class SHBParser extends BParser<StrBParser[]> {
-    
+
     private final static Parser<StrBParser> PARSER_PARSER = (str1) -> {
         ParseRes<String> pr1 = new TOKEN(new SURROUND('{', '}')).parse(str1);
         if (pr1.failed()) {
@@ -183,19 +183,36 @@ public class SHBParser extends BParser<StrBParser[]> {
 
         String parseVal = pr.getParseVal();
         String parsesStr = parseVal.substring(3, parseVal.length());
-        
+
         ParseRes<Object[]> parsersRes = ONE_OR_MORE.parseNoB(parsesStr, PARSER_PARSER);
-        if(parsersRes.failed()){
+        if (parsersRes.failed()) {
             return new ParseRes<ONE_OF>();
         }
-        
+
         Object[] pObjs = parsersRes.getParseVal();
         StrBParser[] parsers = new StrBParser[pObjs.length];
-        for(int i = 0; i < pObjs.length; i++){
+        for (int i = 0; i < pObjs.length; i++) {
             parsers[i] = StrBParser.makeParser((Parser<String>) pObjs[i]);
         }
-        
+
         return new ParseRes<ONE_OF>(pr.getStrRem(), new ONE_OF<>(parsers));
+    };
+
+    private final static Parser<SURROUND> SURROUND_PARSER = (str) -> {
+        ParseRes<String> pr = PUtil.parserSeq(str, new SYMBOL("sur"), new ONE(), new SPACES(),
+                new ONE());
+        if (pr.failed()) {
+            pr = PUtil.parserSeq(str, new SYMBOL("sur"), new ONE());
+            if (pr.failed()) {
+                return new ParseRes<SURROUND>();
+            } else {
+                String parseVal = pr.getParseVal();
+                return new ParseRes(pr.getStrRem(), new SURROUND(parseVal.charAt(3)));
+            }
+        } else {
+            String parseVal = pr.getParseVal();
+            return new ParseRes(pr.getStrRem(), new SURROUND(parseVal.charAt(3), parseVal.charAt(4)));
+        }
     };
 
     public SHBParser() {
@@ -207,13 +224,13 @@ public class SHBParser extends BParser<StrBParser[]> {
 //        ONE_OF<Parser<String>> parser = new ONE_OF<>(new Parser<Parser<String>>[]{ONE_PARSER, CHR_PARSER, STR_PARSER, SPACES_PARSER, SYMBOL_PARSER, TOKEN_PARSER});
         ONE_OF<Parser<String>> parser = new ONE_OF(ONE_PARSER, CHR_PARSER, STR_PARSER,
                 SPACES_PARSER, SYMBOL_PARSER, TOKEN_PARSER, ONE_OR_MORE_PARSER,
-                ZERO_OR_MORE_PARSER, ONE_OF_PARSER);
+                ZERO_OR_MORE_PARSER, ONE_OF_PARSER, SURROUND_PARSER);
 
         ParseRes<Object[]> pr = ONE_OR_MORE.parseNoB(str, parser);
-        
+
         Object[] pObjs = pr.getParseVal();
         StrBParser[] ps = new StrBParser[pObjs.length];
-        for(int i = 0; i < pObjs.length; i++){
+        for (int i = 0; i < pObjs.length; i++) {
             ps[i] = StrBParser.makeParser((Parser<String>) pObjs[i]);
         }
 

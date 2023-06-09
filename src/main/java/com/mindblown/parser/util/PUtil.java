@@ -147,12 +147,13 @@ public class PUtil {
      * <li> SAT: sat </li>
      * <li> CHR: c 'character' </li>
      * <li> STR: str "String" </li>
-     * <li> SPACES: spc | _ </li>
+     * <li> SPACES: spc T | spc F | _ </li>
      * <li> SYMBOL: sym "String" </li>
-     * <li> TOKEN: tok {Parser} </li>
-     * <li> ONE_OR_MORE: oom {Parser} </li>
-     * <li> ZERO_OR_MORE: zom {Parser} </li>
-     * <li> ONE_OF: oof {Parser1} {Parser2} etc. </li>
+     * <li> TOKEN: tok {ParserSH} </li>
+     * <li> ONE_OR_MORE: oom {ParserSH} </li>
+     * <li> ZERO_OR_MORE: zom {ParserSH} </li>
+     * <li> ONE_OF: oof {ParserSH1} {ParserSH2} etc. </li>
+     * <li> SURROUND: sur char | sur startChar endChar
      * </ul>
      * @param strToParse
      * @return
