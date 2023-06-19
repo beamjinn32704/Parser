@@ -64,6 +64,10 @@ public class PUtil {
             return p2.parse(str);
         }
     }
+    
+    public static ParseRes<Object[]> parserSeqNoBO(String str, Parser p1, Parser... ps){
+        return parserSeqNoB(str, p1, ps);
+    }
 
     public static <T> ParseRes<T[]> parserSeqNoB(String str, Parser<T> p1, Parser<T>... ps) {
         ParseRes<T> firstPR = p1.parse(str);
@@ -101,6 +105,14 @@ public class PUtil {
             return tList.toArray(a1);
         };
         return binder;
+    }
+    
+    public static ParseRes<String> strParserSeq(String str, Parser<String> p1, Parser<String>... ps){
+        ParseRes<String[]> pr = parserSeqNoB(str, p1, ps);
+        if(pr.failed()){
+            return new ParseRes<>();
+        }
+        return new ParseRes<>(pr.getStrRem(), String.join("", pr.getParseVal()));
     }
 
     public static <T> ParseRes<T> parserSeq(String str, Binder<T> binder, Parser<T> p1, Parser<T>... ps) {
@@ -164,6 +176,14 @@ public class PUtil {
             return new ParseRes<>();
         }
         return parserSeq(strToParse, StrBParser.STRING_BINDER, parsers);
+    }
+    
+    public static ParseRes<String> runParseShorthand(String parse, ParseRes<String> pr){
+        ParseRes<String> res = runParseShorthand(parse, pr.getStrRem());
+        if(res.failed()){
+            return new ParseRes<>();
+        }
+        return new ParseRes<>(pr.getStrRem(), pr.getParseVal() + res.getParseVal());
     }
 
     public static StrBParser[] getParsersSH(String parse) {

@@ -13,9 +13,9 @@ import com.mindblown.parser.Parser;
  */
 public class TOKEN<T> implements Parser<T> {
 
-    private Parser parser;
+    private Parser<T> parser;
 
-    public TOKEN(Parser p) {
+    public TOKEN(Parser<T> p) {
         parser = p;
     }
 
