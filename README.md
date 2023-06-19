@@ -24,3 +24,8 @@ A quick list of the pre-defined Parsers and their functionality:
 * ONE_OF - takes a list of Parsers and runs each Parser against a string until it finds a Parser that successfully parses
 * ZERO_OR_MORE - takes a Parser and uses it to parse a string _zero or more times_ until the Parser returns a failed ParseRes
 * ONE_OR_MORE - same as ZERO_OR_MORE, but is only successful if the Parser parses a string successfully at least once (hence, _one or more_)
+
+PUtil has two main functionalities: helping sequence parsing operations, and creating a shorthand for parsing.
+Sequencing Example:
+A parser sequence (in pseudocode) that could be used to parse the declaraction of a boolean variable (in the form of "boolean varName = booleanValue;") could be something like: ```SYMBOL("boolean"), SAT(new Pred(){return true if string doesn't begin with a string or =}), SYMBOL("="), ONE_OF(new STR("true"), new STR("false")), STR(";")```
+To use this sequence we, can use different PUtil functions, depending on what form we want to parse value to be. If we want all the parse values binded in one string, we could use ```PUtil.strParserSeq```. If we would like all the parsed values in an Object array, we can use ```PUtil.parserSeqNoBO```.
